@@ -1,21 +1,21 @@
 class KubernetesHelm < Formula
   desc "The Kubernetes package manager"
   homepage "https://helm.sh/"
-  url "https://github.com/kubernetes/helm.git",
-      :tag => "v2.9.1",
-      :revision => "20adb27c7c5868466912eebdf6664e7390ebe710"
-  head "https://github.com/kubernetes/helm.git"
+  url "https://github.com/helm/helm.git",
+      :tag      => "v2.12.1",
+      :revision => "02a47c7249b1fc6d8fd3b94e6b4babf9d818144e"
+  head "https://github.com/helm/helm.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "4f3a2f2d25faad4c53dfa55249893227ce2a1aec9f03ba6e89171f23cf3a7d73" => :high_sierra
-    sha256 "957f5eb8e53ad1083b2065685207728444ec8e1ffa90538aeb14336ebb139c0f" => :sierra
-    sha256 "6f974a1efcb655ba264d3667c2e7f0c849bb110c0cd93e2e45fd03ac2451bdd0" => :el_capitan
+    sha256 "2898615f11b902a64b662565286cc01c809ab817beaa1308488d89bd85930748" => :mojave
+    sha256 "45ccc763cf02796cc9faa77f35fb8445244b92064c9e512157bb341e7730cd5a" => :high_sierra
+    sha256 "f2402b731d576a069d82a98f94789203905291f4fd9039287d8f35427efe56a8" => :sierra
   end
 
-  depends_on "mercurial" => :build
-  depends_on "go" => :build
   depends_on "glide" => :build
+  depends_on "go" => :build
+  depends_on "mercurial" => :build
 
   def install
     ENV["GOPATH"] = buildpath
@@ -33,7 +33,13 @@ class KubernetesHelm < Formula
       bin.install "bin/helm"
       bin.install "bin/tiller"
       man1.install Dir["docs/man/man1/*"]
-      bash_completion.install "scripts/completions.bash" => "helm"
+
+      output = Utils.popen_read("SHELL=bash #{bin}/helm completion bash")
+      (bash_completion/"helm").write output
+
+      output = Utils.popen_read("SHELL=zsh #{bin}/helm completion zsh")
+      (zsh_completion/"_helm").write output
+
       prefix.install_metafiles
     end
   end
